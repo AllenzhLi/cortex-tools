@@ -15,7 +15,7 @@ import (
 const (
 	rulerAPIPath    = "/api/v1/rules"
 	legacyAPIPath   = "/api/prom/rules"
-	rulerAllAPIPath = "/api/v1/allrules"
+	rulerAllAPIPath = "/ruler/rules"
 )
 
 // CreateRuleGroup creates a new rule group

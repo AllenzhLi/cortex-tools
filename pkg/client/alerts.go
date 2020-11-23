@@ -11,7 +11,7 @@ import (
 
 const (
 	alertmanagerAPIPath    = "/api/v1/alerts"
-	alertmanagerAllAPIPath = "/api/v1/allalerts"
+	alertmanagerAllAPIPath = "/multitenant_alertmanager/configs"
 )
 
 type configCompat struct {
