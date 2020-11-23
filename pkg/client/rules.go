@@ -13,8 +13,9 @@ import (
 )
 
 const (
-	rulerAPIPath  = "/api/v1/rules"
-	legacyAPIPath = "/api/prom/rules"
+	rulerAPIPath    = "/api/v1/rules"
+	legacyAPIPath   = "/api/prom/rules"
+	rulerAllAPIPath = "/api/v1/allrules"
 )
 
 // CreateRuleGroup creates a new rule group
@@ -129,6 +130,35 @@ func (r *CortexClient) ListRules(ctx context.Context, namespace string) (map[str
 	}
 
 	ruleSet := map[string][]rwrulefmt.RuleGroup{}
+	err = yaml.Unmarshal(body, &ruleSet)
+	if err != nil {
+		return nil, err
+	}
+
+	return ruleSet, nil
+}
+
+// ListAllRules retrieves all user rule group
+func (r *CortexClient) ListAllRules(ctx context.Context) (map[string]map[string][]rwrulefmt.RuleGroup, error) {
+	path := rulerAllAPIPath
+
+	log.WithFields(log.Fields{
+		"url": path,
+	}).Debugln("path built to request rule group")
+
+	res, err := r.doRequest(path, "GET", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	ruleSet := map[string]map[string][]rwrulefmt.RuleGroup{}
 	err = yaml.Unmarshal(body, &ruleSet)
 	if err != nil {
 		return nil, err
