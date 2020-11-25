@@ -25,16 +25,8 @@ func (r *CortexClient) CreateRuleGroup(ctx context.Context, namespace string, rg
 		return err
 	}
 
-	path := rulerAPIPath
-	if r.legacy {
-		path = legacyAPIPath
-	}
 	escapedNamespace := url.PathEscape(namespace)
-	path += "/" + escapedNamespace
-
-	log.WithFields(log.Fields{
-		"url": path,
-	}).Debugln("path built to request rule group")
+	path := r.apiPath + "/" + escapedNamespace
 
 	res, err := r.doRequest(path, "POST", payload)
 	if err != nil {
@@ -48,17 +40,9 @@ func (r *CortexClient) CreateRuleGroup(ctx context.Context, namespace string, rg
 
 // DeleteRuleGroup creates a new rule group
 func (r *CortexClient) DeleteRuleGroup(ctx context.Context, namespace, groupName string) error {
-	path := rulerAPIPath
-	if r.legacy {
-		path = legacyAPIPath
-	}
 	escapedNamespace := url.PathEscape(namespace)
 	escapedGroupName := url.PathEscape(groupName)
-	path += "/" + escapedNamespace + "/" + escapedGroupName
-
-	log.WithFields(log.Fields{
-		"url": path,
-	}).Debugln("path built to request rule group")
+	path := r.apiPath + "/" + escapedNamespace + "/" + escapedGroupName
 
 	_, err := r.doRequest(path, "DELETE", nil)
 	return err
@@ -66,17 +50,9 @@ func (r *CortexClient) DeleteRuleGroup(ctx context.Context, namespace, groupName
 
 // GetRuleGroup retrieves a rule group
 func (r *CortexClient) GetRuleGroup(ctx context.Context, namespace, groupName string) (*rwrulefmt.RuleGroup, error) {
-	path := rulerAPIPath
-	if r.legacy {
-		path = legacyAPIPath
-	}
 	escapedNamespace := url.PathEscape(namespace)
 	escapedGroupName := url.PathEscape(groupName)
-	path += "/" + escapedNamespace + "/" + escapedGroupName
-
-	log.WithFields(log.Fields{
-		"url": path,
-	}).Debugln("path built to request rule group")
+	path := r.apiPath + "/" + escapedNamespace + "/" + escapedGroupName
 
 	res, err := r.doRequest(path, "GET", nil)
 	if err != nil {
@@ -105,17 +81,10 @@ func (r *CortexClient) GetRuleGroup(ctx context.Context, namespace, groupName st
 
 // ListRules retrieves a rule group
 func (r *CortexClient) ListRules(ctx context.Context, namespace string) (map[string][]rwrulefmt.RuleGroup, error) {
-	path := rulerAPIPath
-	if r.legacy {
-		path = legacyAPIPath
-	}
+	path := r.apiPath
 	if namespace != "" {
 		path = path + "/" + namespace
 	}
-
-	log.WithFields(log.Fields{
-		"url": path,
-	}).Debugln("path built to request rule group")
 
 	res, err := r.doRequest(path, "GET", nil)
 	if err != nil {
