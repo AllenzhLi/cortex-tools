@@ -111,10 +111,6 @@ func (r *CortexClient) ListRules(ctx context.Context, namespace string) (map[str
 func (r *CortexClient) ListAllRules(ctx context.Context) (map[string]map[string][]rwrulefmt.RuleGroup, error) {
 	path := rulerAllAPIPath
 
-	log.WithFields(log.Fields{
-		"url": path,
-	}).Debugln("path built to request rule group")
-
 	res, err := r.doRequest(path, "GET", nil)
 	if err != nil {
 		return nil, err
