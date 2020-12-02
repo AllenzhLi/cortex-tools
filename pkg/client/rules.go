@@ -12,11 +12,7 @@ import (
 	"github.com/grafana/cortex-tools/pkg/rules/rwrulefmt"
 )
 
-const (
-	rulerAPIPath    = "/api/v1/rules"
-	legacyAPIPath   = "/api/prom/rules"
-	rulerAllAPIPath = "/ruler/rules"
-)
+const rulerAllAPIPath = "/ruler/rules"
 
 // CreateRuleGroup creates a new rule group
 func (r *CortexClient) CreateRuleGroup(ctx context.Context, namespace string, rg rwrulefmt.RuleGroup) error {
