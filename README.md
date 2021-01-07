@@ -88,13 +88,13 @@ This command will load each rule group in the specified files and load them into
 
 #### Rules Lint
 
-This command lints a rules file. The linter's aim is not to verify correctness but just YAML and PromQL expression formatting within the rule file. This command always edits in place, you can use the dry run flag (`-n`) if you'd like to perform a trial run that does not make any changes.
+This command lints a rules file. The linter's aim is not to verify correctness but just YAML and PromQL expression formatting within the rule file. This command always edits in place, you can use the dry run flag (`-n`) if you'd like to perform a trial run that does not make any changes. This command does not interact with your Cortex cluster.
 
     cortextool rules lint -n ./example_rules_one.yaml ./example_rules_two.yaml ...
 
 #### Rules Prepare
 
-This command prepares a rules file for upload to Cortex. It lints all your PromQL expressions and adds an specific label to your PromQL query aggregations in the file. Unlike, the previous command this one does not interact with your Cortex cluster.
+This command prepares a rules file for upload to Cortex. It lints all your PromQL expressions and adds an specific label to your PromQL query aggregations in the file. This command does not interact with your Cortex cluster.
 
     cortextool rules prepare -i ./example_rules_one.yaml ./example_rules_two.yaml ...
 
@@ -110,10 +110,65 @@ It is important to note that a modification can be a PromQL expression lint or a
 
 #### Rules Check
 
-This commands checks rules against the recommended [best practices](https://prometheus.io/docs/practices/rules/) for rules.
+This commands checks rules against the recommended [best practices](https://prometheus.io/docs/practices/rules/) for rules. This command does not interact with your Cortex cluster.
 
     cortextool rules check ./example_rules_one.yaml
 
+
+#### Remote Read
+
+Cortex exposes a [Remote Read API] which allows access to the stored series. The `remote-read` subcommand of `cortextool` allows to interact with its API, to find out which series are stored.
+
+[Remote Read API]: https://prometheus.io/docs/prometheus/latest/storage/#remote-storage-integrations
+
+##### Remote Read show statistics
+
+The `remote-read stats` command summarizes statistics of the stored series matching the selector.
+
+```sh
+cortextool remote-read stats --selector '{job="node"}' --address http://demo.robustperception.io:9090 --remote-read-path /api/v1/read
+INFO[0000] Create remote read client using endpoint 'http://demo.robustperception.io:9090/api/v1/read'
+INFO[0000] Querying time from=2020-12-30T14:00:00Z to=2020-12-30T15:00:00Z with selector={job="node"}
+INFO[0000] MIN TIME                           MAX TIME                           DURATION     NUM SAMPLES  NUM SERIES   NUM STALE NAN VALUES  NUM NAN VALUES
+INFO[0000] 2020-12-30 14:00:00.629 +0000 UTC  2020-12-30 14:59:59.629 +0000 UTC  59m59s       159480       425          0                     0
+```
+
+##### Remote Read dump series
+
+The `remote-read dump` command prints all series and samples matching the selector.
+
+```sh
+cortextool remote-read dump --selector 'up{job="node"}' --address http://demo.robustperception.io:9090 --remote-read-path /api/v1/read
+{__name__="up", instance="demo.robustperception.io:9100", job="node"} 1 1609336914711
+{__name__="up", instance="demo.robustperception.io:9100", job="node"} NaN 1609336924709 # StaleNaN
+[...]
+```
+##### Remote Read export series into local TSDB
+
+The `remote-read export` command exports all series and samples matching the selector into a local TSDB. This TSDB can then be further analysed with local tooling like `prometheus` and `promtool`.
+
+```sh
+# Use Remote Read API to download all metrics with label job=name into local tsdb
+cortextool remote-read export --selector '{job="node"}' --address http://demo.robustperception.io:9090 --remote-read-path /api/v1/read --tsdb-path ./local-tsdb
+INFO[0000] Create remote read client using endpoint 'http://demo.robustperception.io:9090/api/v1/read'
+INFO[0000] Created TSDB in path './local-tsdb'
+INFO[0000] Using existing TSDB in path './local-tsdb'
+INFO[0000] Querying time from=2020-12-30T13:53:59Z to=2020-12-30T14:53:59Z with selector={job="node"}
+INFO[0001] Store TSDB blocks in './local-tsdb'
+INFO[0001] BLOCK ULID                  MIN TIME                       MAX TIME                       DURATION     NUM SAMPLES  NUM CHUNKS   NUM SERIES   SIZE
+INFO[0001] 01ETT28D6B8948J87NZXY8VYD9  2020-12-30 13:53:59 +0000 UTC  2020-12-30 13:59:59 +0000 UTC  6m0.001s     15950        429          425          105KiB867B
+INFO[0001] 01ETT28D91Z9SVRYF3DY0KNV41  2020-12-30 14:00:00 +0000 UTC  2020-12-30 14:53:58 +0000 UTC  53m58.001s   143530       1325         425          509KiB679B
+
+# Examples for using local TSDB
+## Analyzing contents using promtool
+promtool tsdb analyze ./local-tsdb
+
+## Dump all values of the TSDB
+promtool tsdb dump ./local-tsdb
+
+## Run a local prometheus
+prometheus --storage.tsdb.path ./local-tsdb --config.file=<(echo "")
+```
 
 #### Overrides Exporter
 
@@ -124,6 +179,14 @@ The Overrides Exporter allows to continuously export [per tenant configuration o
 [override config file]:./pkg/commands/testdata/overrides.yaml
 [presets file]:./pkg/commands/testdata/presets.yaml
 [runtime-config]:https://cortexmetrics.io/docs/configuration/arguments/#runtime-configuration-file
+
+#### Generate ACL Headers
+
+This lets you generate the header which can then be used to enforce access control rules in GME / GrafanaCloud.
+
+```
+./cortextool acl generate-header --id=1234 --rule='{namespace="A"}'
+```
 
 ## chunktool
 

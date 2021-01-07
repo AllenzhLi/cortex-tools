@@ -1,8 +1,24 @@
 # Changelog
 
+Order should be `CHANGE`, `FEATURE`, `ENHANCEMENT`, and `BUGFIX`
 
-## Unreleased
+## v0.7.0
 
+* [FEATURE] Add `remote-read` commands to investigate series through the remote-read API. #134
+   - `remote-read export`: Export metrics remote read series into a local TSDB.
+   - `remote-read dump`: Dump remote read series.
+   - `remote-read stats`: Show statistic of remote read series.
+
+## v0.6.1
+
+* [BUGFIX] Fix `cortextool` generating the wrong paths when executing multiple calls to the cortex API. In particular, commands like `load`, `sync` were affected. #133
+
+## v0.6.0
+
+* [CHANGE] When using `rules` commands, cortex ruler API requests will now default to using the `/api/v1/` prefix. The `--use-legacy-routes` flag has been added to allow users to use the original `/api/prom/` routes. #99
+* [FEATURE] Add support for position rule-files arguments to `rules sync` and `rules diff` #125
+* [FEATURE] Add an allow-list of namespaces for `rules sync` and `rules diff` #125
+* [ENHANCEMENT] Handle trailing slashes in URLs on `cortextool`. #128
 * [BUGFIX] Fix inaccuracy in `e2ealerting` caused by invalid purging condition on timestamps. #117
 * [CHANGE] When using `rules` commands, cortex ruler API requests will now default to using the `/api/v1/` prefix. The `--use-legacy-routes` flag has been added to allow users to use the original `/api/prom/` routes. #99
   
