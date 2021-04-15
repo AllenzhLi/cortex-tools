@@ -7,6 +7,7 @@ require (
 	cloud.google.com/go/storage v1.10.0
 	github.com/alecthomas/chroma v0.7.0
 	github.com/alecthomas/repr v0.0.0-20181024024818-d37bc2a10ba1 // indirect
+	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d
 	github.com/cortexproject/cortex v1.4.1-0.20201022071705-85942c5703cf
 	github.com/dlclark/regexp2 v1.2.0 // indirect
 	github.com/go-kit/kit v0.10.0
