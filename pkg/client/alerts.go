@@ -29,14 +29,26 @@ func (r *CortexClient) CreateAlertmanagerConfig(ctx context.Context, cfg string,
 		return err
 	}
 
-	_, err = r.doRequest(alertmanagerAPIPath, "POST", payload)
-	return err
+	res, err := r.doRequest(alertmanagerAPIPath, "POST", payload)
+	if err != nil {
+		return err
+	}
+
+	defer res.Body.Close()
+
+	return nil
 }
 
 // DeleteAlermanagerConfig deletes the users alertmanager config
 func (r *CortexClient) DeleteAlermanagerConfig(ctx context.Context) error {
-	_, err := r.doRequest(alertmanagerAPIPath, "DELETE", nil)
-	return err
+	res, err := r.doRequest(alertmanagerAPIPath, "DELETE", nil)
+	if err != nil {
+		return err
+	}
+
+	defer res.Body.Close()
+
+	return nil
 }
 
 // GetAlertmanagerConfig retrieves a user alertmanager config
