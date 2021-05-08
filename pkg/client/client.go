@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"path"
+	"strings"
 	"time"
 
 	"github.com/cortexproject/cortex/pkg/util/tls"
@@ -169,7 +169,23 @@ func checkResponse(r *http.Response) error {
 	return errors.New("failed request to the cortex api")
 }
 
+func joinPath(baseURLPath, targetPath string) string {
+	// trim exactly one slash at the end of the base URL, this expects target
+	// path to always start with a slash
+	return strings.TrimSuffix(baseURLPath, "/") + targetPath
+}
+
 func buildRequest(p, m string, endpoint url.URL, payload []byte) (*http.Request, error) {
-	endpoint.Path = path.Join(endpoint.Path, p)
+	// parse path parameter again (as it already contains escaped path information
+	pURL, err := url.Parse(p)
+	if err != nil {
+		return nil, err
+	}
+
+	// if path or endpoint contains escaping that requires RawPath to be populated, also join rawPath
+	if pURL.RawPath != "" || endpoint.RawPath != "" {
+		endpoint.RawPath = joinPath(endpoint.EscapedPath(), pURL.EscapedPath())
+	}
+	endpoint.Path = joinPath(endpoint.Path, pURL.Path)
 	return http.NewRequest(m, endpoint.String(), bytes.NewBuffer(payload))
 }
